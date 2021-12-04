@@ -43,14 +43,16 @@ func Connect(cfg *config.MongoConfig) (*MongoDB, error) {
 }
 
 func (m *MongoDB) GetItemByName(name string) (*models.Item, error) {
-
 	var result models.Item
+
 	if err := m.collection.FindOne(context.TODO(), bson.M{"name": name}).Decode(&result); err != nil {
 		return nil, err
 	}
+
 	if result.Name == "" && result.Price == 0 {
 		return nil, nil
 	}
+
 	return &result, nil
 }
 
@@ -59,10 +61,7 @@ func (m *MongoDB) CreateItem(item models.Item) error {
 		{"name", item.Name},
 		{"price", item.Price},
 	})
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (m *MongoDB) UpdatePriceByName(item models.Item) error {
@@ -73,10 +72,7 @@ func (m *MongoDB) UpdatePriceByName(item models.Item) error {
 			{"$set", bson.D{{"price", item.Price}}},
 		},
 	)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (m *MongoDB) GetItemsWithSort(start int32, limit int32, sortType string, orderType string) ([]models.Item, error) {
