@@ -1,1 +1,41 @@
 syntax = "proto3";
+
+option go_package = "/transport";
+
+service FetchService {
+    rpc Fetch(FetchRequest) returns (Empty) {}
+    rpc List(ListRequest) returns (ListResponse) {}
+}
+
+message ListRequest {
+    int32 start = 1;
+    int32 limit = 2;
+    SortType sort = 3;
+    SortOrder pagging = 4;
+}
+
+enum SortType {
+    NAME = 0;
+    PRICE = 1;
+}
+
+enum SortOrder {
+    ASC = 0;
+    DESC = 1;
+}
+
+message ListResponse {
+    repeated Item item = 1;
+}
+
+message Item {
+    string name = 1;
+    int32 price = 2;
+}
+
+
+message FetchRequest {
+    string url = 1;
+}
+
+message Empty {}
