@@ -1,9 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
@@ -23,7 +20,6 @@ func NewMongoConfig() (*MongoConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("%+v\n", mongo)
 	return &mongo, nil
 }
 
@@ -48,7 +44,6 @@ type Config struct {
 
 func Read() (*Config, error) {
 	err := godotenv.Load(".env")
-	time.Sleep(time.Millisecond * 500)
 	if err != nil {
 		return nil, err
 	}
