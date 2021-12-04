@@ -7,25 +7,15 @@ import (
 	"time"
 )
 
-// const url = "http://164.92.251.245:8080/api/v1/products"
+const url = "http://164.92.251.245:8080/api/v1/products"
+const grpcPort = "9000"
 
 func main() {
 
-	server, err := server.New()
+	server, err := server.New(grpcPort)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Download and update data in MongoDB
-	// for {
-	// 	time.Sleep(time.Second * 3)
-	// 	err = server.Fetch(url)
-	// 	if err != nil {
-	// 		log.Printf("FETCH ERROR: %s", err.Error())
-	// 	}
-	// 	log.Println("FETCH SUCCESS")
-
-	// }
 
 	pagging := transport.Pagging{
 		Limit: 5,
@@ -38,6 +28,13 @@ func main() {
 	}
 
 	for {
+		time.Sleep(time.Second * 3)
+		err = server.Fetch(url)
+		if err != nil {
+			log.Printf("FETCH ERROR: %s", err.Error())
+		}
+		log.Println("FETCH SUCCESS")
+
 		time.Sleep(time.Second * 5)
 		list, err := server.List(&pagging, &sorting)
 		if err != nil {
