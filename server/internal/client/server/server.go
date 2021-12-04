@@ -12,8 +12,8 @@ type Server struct {
 	grpcClient transport.FetchServiceClient
 }
 
-func New() (*Server, error) {
-	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+func New(grpcPort string) (*Server, error) {
+	conn, err := grpc.Dial(fmt.Sprintf(":%s", grpcPort), grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
@@ -60,11 +60,11 @@ func (s *Server) List(pagg *transport.Pagging, sort *transport.Sorting) ([]strin
 		return []string{}, err
 	}
 
-	data := itemsUnformatted(items)
+	data := itemsFormating(items)
 	return data, err
 }
 
-func itemsUnformatted(items *transport.ListResponse) []string {
+func itemsFormating(items *transport.ListResponse) []string {
 	itemList := items.Item
 	for _, item := range itemList {
 		fmt.Println(item)
