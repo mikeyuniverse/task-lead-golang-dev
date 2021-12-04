@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"grpc-practice/internal/server/config"
-	"grpc-practice/internal/server/models"
-	"net/http"
 
 	// "grpc-server/pkg/proto/transport"
 
@@ -16,29 +14,20 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Server struct {
-	Host       string
-	Port       string
-	services   services
-	httpServer *http.Server
-	transport.UnimplementedFetchServiceServer
-}
-
 type services interface {
 	Fetch(req *transport.FetchRequest) error
 	List(context context.Context, start int32, limit int32, sortType string, orderType string) ([]*transport.Item, error)
-	GetDataByURL(url string) ([]models.Item, error)
-	UpdateDB([]models.Item) error
+}
+type Server struct {
+	Port     string
+	services services
+	transport.UnimplementedFetchServiceServer
 }
 
 func New(cfg *config.GRPC, services services) (*Server, error) {
 	return &Server{
-		Host:     cfg.Host,
 		Port:     cfg.Port,
 		services: services,
-		httpServer: &http.Server{
-			Addr: "localhost:8080",
-		},
 	}, nil
 }
 
@@ -57,10 +46,7 @@ func (srv *Server) Start() error {
 }
 
 func (s *Server) Fetch(ctx context.Context, req *transport.FetchRequest) (*transport.Empty, error) {
-	err := s.services.Fetch(req)
-	if err != nil {
-		return new(transport.Empty), err
-	}
+	s.services.Fetch(req)
 	return new(transport.Empty), nil
 }
 
@@ -69,6 +55,7 @@ func (s *Server) List(ctx context.Context, req *transport.ListRequest) (*transpo
 	limit := req.Limit
 	sortType := req.Sort.String()
 	orderType := req.Pagging.String()
+
 	response, err := s.services.List(ctx, start, limit, sortType, orderType)
 	if err != nil {
 		return nil, err
