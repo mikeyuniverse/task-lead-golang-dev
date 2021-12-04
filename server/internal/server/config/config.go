@@ -1,5 +1,13 @@
 package config
 
+import (
+	"fmt"
+	"time"
+
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
+)
+
 type MongoConfig struct {
 	Host           string
 	Port           string
@@ -10,7 +18,13 @@ type MongoConfig struct {
 }
 
 func NewMongoConfig() (*MongoConfig, error) {
-	return &MongoConfig{}, nil
+	var mongo MongoConfig
+	err := envconfig.Process("MONGO", &mongo)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("%+v\n", mongo)
+	return &mongo, nil
 }
 
 type GRPC struct {
@@ -19,7 +33,12 @@ type GRPC struct {
 }
 
 func NewGRPCConfig() (*GRPC, error) {
-	return &GRPC{}, nil
+	var grpc GRPC
+	err := envconfig.Process("grpc", &grpc)
+	if err != nil {
+		return nil, err
+	}
+	return &grpc, nil
 }
 
 type Config struct {
@@ -28,6 +47,11 @@ type Config struct {
 }
 
 func Read() (*Config, error) {
+	err := godotenv.Load(".env")
+	time.Sleep(time.Millisecond * 500)
+	if err != nil {
+		return nil, err
+	}
 	mongo, err := NewMongoConfig()
 	if err != nil {
 		return nil, err
