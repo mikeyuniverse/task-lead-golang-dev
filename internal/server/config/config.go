@@ -8,8 +8,6 @@ import (
 type MongoConfig struct {
 	Host           string
 	Port           string
-	User           string
-	Password       string
 	DBName         string
 	CollectionName string
 }
@@ -24,7 +22,6 @@ func NewMongoConfig() (*MongoConfig, error) {
 }
 
 type GRPC struct {
-	Host string
 	Port string
 }
 
