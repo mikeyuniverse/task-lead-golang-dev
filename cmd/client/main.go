@@ -28,20 +28,29 @@ func main() {
 	}
 
 	for {
-		time.Sleep(time.Second * 3)
+		log.Println("Request \"Fetch\" with url - ", url)
 		err = server.Fetch(url)
 		if err != nil {
 			log.Printf("FETCH ERROR: %s", err.Error())
+		} else {
+			log.Println("FETCH SUCCESS")
 		}
-		log.Println("FETCH SUCCESS")
 
+		log.Println("Wait 5 seconds")
 		time.Sleep(time.Second * 5)
+
+		log.Println("Request \"List\"")
 		list, err := server.List(&pagging, &sorting)
 		if err != nil {
-			log.Println(err)
+			log.Printf("Error - %s\n", err)
 			continue
 		}
-		log.Println(list)
+
+		log.Println("Results - ", list)
 		pagging.Start = pagging.Start + pagging.Limit
+		log.Printf("New pagging params:\nStart - %d\nLimit - %d\n", pagging.Start, pagging.Limit)
+
+		log.Println("Wait 3 seconds")
+		time.Sleep(time.Second * 3)
 	}
 }
