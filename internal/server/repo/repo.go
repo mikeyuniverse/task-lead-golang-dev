@@ -2,14 +2,20 @@ package repo
 
 import (
 	"grpc-practice/internal/server/models"
-	"grpc-practice/internal/server/repo/mongo"
 )
 
-type Repo struct {
-	db *mongo.MongoDB
+type Database interface {
+	GetItemByName(name string) (*models.Item, error)
+	CreateItem(item models.Item) error
+	UpdatePriceByName(item models.Item) error
+	GetItemsWithSort(start int32, limit int32, sortType string, orderType string) ([]models.Item, error)
 }
 
-func New(db *mongo.MongoDB) (*Repo, error) {
+type Repo struct {
+	db Database
+}
+
+func New(db Database) (*Repo, error) {
 	return &Repo{db: db}, nil
 }
 
