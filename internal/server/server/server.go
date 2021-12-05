@@ -4,20 +4,19 @@ import (
 	"context"
 	"fmt"
 	"grpc-practice/internal/server/config"
-
-	// "grpc-server/pkg/proto/transport"
-
+	"grpc-practice/pkg/proto/transport"
 	"net"
 
-	"grpc-practice/pkg/proto/transport"
-
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type services interface {
 	Fetch(req *transport.FetchRequest) error
 	List(context context.Context, start int32, limit int32, sortType string, orderType string) ([]*transport.Item, error)
 }
+
 type Server struct {
 	Port     string
 	services services
@@ -58,7 +57,8 @@ func (s *Server) List(ctx context.Context, req *transport.ListRequest) (*transpo
 
 	response, err := s.services.List(ctx, start, limit, sortType, orderType)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Canceled, err.Error())
 	}
+
 	return &transport.ListResponse{Item: response}, nil
 }
