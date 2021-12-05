@@ -57,7 +57,7 @@ func (s *Services) List(context context.Context, start int32, limit int32, sortT
 		return []*transport.Item{}, err
 	}
 
-	result := []*transport.Item{}
+	result := make([]*transport.Item, len(items))
 	for _, item := range items {
 		result = append(result, item.ToPB())
 	}
@@ -72,7 +72,7 @@ func (s *Services) GetItemsByURL(url string) ([]models.Item, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return []models.Item{}, err
+		return []models.Item{}, fmt.Errorf("request error. code - %d", resp.StatusCode)
 	}
 
 	r := csv.NewReader(resp.Body)
