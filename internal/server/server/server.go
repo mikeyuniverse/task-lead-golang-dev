@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"grpc-practice/internal/server/config"
+	"grpc-practice/internal/server/repo"
 	"grpc-practice/pkg/proto/transport"
 	"net"
 
@@ -14,7 +15,7 @@ import (
 
 type services interface {
 	Fetch(req *transport.FetchRequest) error
-	List(context context.Context, start int32, limit int32, sortType string, orderType string) ([]*transport.Item, error)
+	List(context context.Context, params repo.ListParams) ([]*transport.Item, error)
 }
 
 type Server struct {
@@ -50,12 +51,12 @@ func (s *Server) Fetch(ctx context.Context, req *transport.FetchRequest) (*trans
 }
 
 func (s *Server) List(ctx context.Context, req *transport.ListRequest) (*transport.ListResponse, error) {
-	start := req.Start
-	limit := req.Limit
-	sortType := req.Sort.String()
-	orderType := req.Pagging.String()
-
-	response, err := s.services.List(ctx, start, limit, sortType, orderType)
+	response, err := s.services.List(ctx, repo.ListParams{
+		Start:     int64(req.Start),
+		Limit:     int64(req.Limit),
+		SortType:  req.Sort.String(),
+		OrderType: req.Pagging.String(),
+	})
 	if err != nil {
 		return nil, status.Error(codes.Canceled, err.Error())
 	}
