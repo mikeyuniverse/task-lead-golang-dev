@@ -39,17 +39,14 @@ func (s *Services) List(context context.Context, params repo.ListParams) ([]*tra
 	orderType := params.OrderType
 
 	if start < 0 || limit <= 0 {
-		fmt.Println(start, limit, sortType, orderType)
 		return []*transport.Item{}, errors.New("pagging params must be greater than 0")
 	}
 
 	if orderType != "ASC" && orderType != "DESC" {
-		fmt.Println(start, limit, sortType, orderType)
 		return []*transport.Item{}, errors.New("unknown ordering params")
 	}
 
 	if sortType != "NAME" && sortType != "PRICE" {
-		fmt.Println(start, limit, sortType, orderType)
 		return []*transport.Item{}, errors.New("unknown sorting column name")
 	}
 
