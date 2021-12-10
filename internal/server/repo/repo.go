@@ -8,7 +8,7 @@ import (
 
 var collectionProducts = "products"
 
-type Products interface {
+type Producter interface {
 	UpdateItems(items []models.Item) error
 	GetItemByName(name string) (*models.Item, error)
 	CreateItem(item models.Item) error
@@ -17,7 +17,7 @@ type Products interface {
 }
 
 type Repo struct {
-	Products Products
+	Products Producter
 }
 
 func New(db *mongo.Database) (*Repo, error) {

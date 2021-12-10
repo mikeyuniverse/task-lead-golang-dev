@@ -13,19 +13,19 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type services interface {
+type servicer interface {
 	Fetch(url string) error
 	List(context context.Context, params repo.ListParams) ([]*transport.Item, error)
 }
 
 type Server struct {
 	Port     string
-	services services
+	services servicer
 	transport.UnimplementedFetchServiceServer
 	context *context.Context
 }
 
-func New(context *context.Context, cfg *config.GRPC, services services) (*Server, error) {
+func New(context *context.Context, cfg *config.GRPC, services servicer) (*Server, error) {
 	return &Server{
 		Port:     cfg.Port,
 		services: services,
