@@ -24,8 +24,8 @@ func New(repo *repo.Repo) *Services {
 	}
 }
 
-func (s *Services) Fetch(req *transport.FetchRequest) error {
-	items, err := s.GetItemsByURL(req.Url)
+func (s *Services) Fetch(url string) error {
+	items, err := s.getItemsByURL(url)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (s *Services) List(context context.Context, params repo.ListParams) ([]*tra
 	return result, nil
 }
 
-func (s *Services) GetItemsByURL(url string) ([]models.Item, error) {
+func (s *Services) getItemsByURL(url string) ([]models.Item, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return []models.Item{}, err

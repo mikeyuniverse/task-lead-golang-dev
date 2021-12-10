@@ -14,7 +14,7 @@ import (
 )
 
 type services interface {
-	Fetch(req *transport.FetchRequest) error
+	Fetch(url string) error
 	List(context context.Context, params repo.ListParams) ([]*transport.Item, error)
 }
 
@@ -22,12 +22,14 @@ type Server struct {
 	Port     string
 	services services
 	transport.UnimplementedFetchServiceServer
+	context *context.Context
 }
 
-func New(cfg *config.GRPC, services services) (*Server, error) {
+func New(context *context.Context, cfg *config.GRPC, services services) (*Server, error) {
 	return &Server{
 		Port:     cfg.Port,
 		services: services,
+		context:  context,
 	}, nil
 }
 
@@ -46,7 +48,10 @@ func (srv *Server) Start() error {
 }
 
 func (s *Server) Fetch(ctx context.Context, req *transport.FetchRequest) (*transport.Empty, error) {
-	s.services.Fetch(req)
+	err := s.services.Fetch(req.Url)
+	if err != nil {
+		return new(transport.Empty), status.Error(codes.Canceled, err.Error())
+	}
 	return new(transport.Empty), nil
 }
 
