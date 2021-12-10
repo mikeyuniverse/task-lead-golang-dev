@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"grpc-practice/internal/server/models"
+	"grpc-practice/internal/server/repo"
 	"grpc-practice/pkg/proto/transport"
 	"io"
 	"net/http"
@@ -13,16 +14,11 @@ import (
 	"strings"
 )
 
-type Repository interface {
-	GetItemsWithSort(int32, int32, string, string) ([]models.Item, error)
-	UpdateItems([]models.Item) error
-}
-
 type Services struct {
-	repo Repository
+	repo *repo.Repo
 }
 
-func New(repo Repository) *Services {
+func New(repo *repo.Repo) *Services {
 	return &Services{
 		repo: repo,
 	}
@@ -36,7 +32,12 @@ func (s *Services) Fetch(req *transport.FetchRequest) error {
 	return s.updateAllItems(items)
 }
 
-func (s *Services) List(context context.Context, start int32, limit int32, sortType string, orderType string) ([]*transport.Item, error) {
+func (s *Services) List(context context.Context, params repo.ListParams) ([]*transport.Item, error) {
+	start := params.Start
+	limit := params.Limit
+	sortType := params.SortType
+	orderType := params.OrderType
+
 	if start < 0 || limit <= 0 {
 		fmt.Println(start, limit, sortType, orderType)
 		return []*transport.Item{}, errors.New("pagging params must be greater than 0")
@@ -52,7 +53,7 @@ func (s *Services) List(context context.Context, start int32, limit int32, sortT
 		return []*transport.Item{}, errors.New("unknown sorting column name")
 	}
 
-	items, err := s.repo.GetItemsWithSort(start, limit, sortType, orderType)
+	items, err := s.repo.Products.GetItemsWithSort(params)
 	if err != nil {
 		return []*transport.Item{}, err
 	}
@@ -110,5 +111,5 @@ func (s *Services) GetItemsByURL(url string) ([]models.Item, error) {
 }
 
 func (s *Services) updateAllItems(items []models.Item) error {
-	return s.repo.UpdateItems(items)
+	return s.repo.Products.UpdateItems(items)
 }
