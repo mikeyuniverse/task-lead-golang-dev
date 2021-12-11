@@ -1,0 +1,15 @@
+mode: set
+grpc-practice/internal/server/config/config.go:15.44,18.16 3 1
+grpc-practice/internal/server/config/config.go:21.2,21.19 1 1
+grpc-practice/internal/server/config/config.go:18.16,20.3 1 0
+grpc-practice/internal/server/config/config.go:28.36,31.16 3 1
+grpc-practice/internal/server/config/config.go:34.2,34.18 1 1
+grpc-practice/internal/server/config/config.go:31.16,33.3 1 0
+grpc-practice/internal/server/config/config.go:42.19,44.16 2 0
+grpc-practice/internal/server/config/config.go:47.2,47.12 1 0
+grpc-practice/internal/server/config/config.go:44.16,46.3 1 0
+grpc-practice/internal/server/config/config.go:50.30,53.16 2 1
+grpc-practice/internal/server/config/config.go:57.2,58.16 2 1
+grpc-practice/internal/server/config/config.go:62.2,65.8 1 1
+grpc-practice/internal/server/config/config.go:53.16,55.3 1 0
+grpc-practice/internal/server/config/config.go:58.16,60.3 1 0
