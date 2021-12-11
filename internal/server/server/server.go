@@ -25,7 +25,7 @@ type Server struct {
 	context *context.Context
 }
 
-func New(context *context.Context, cfg *config.GRPC, services servicer) (*Server, error) {
+func New(context *context.Context, cfg config.GRPC, services servicer) (*Server, error) {
 	return &Server{
 		Port:     cfg.Port,
 		services: services,

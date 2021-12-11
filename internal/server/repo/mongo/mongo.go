@@ -15,7 +15,7 @@ type MongoDB struct {
 	collectionName string
 }
 
-func Connect(cfg *config.MongoConfig) (*mongo.Database, error) {
+func Connect(cfg config.MongoConfig) (*mongo.Database, error) {
 	connectUri := fmt.Sprintf("mongodb://%s:%s", cfg.Host, cfg.Port)
 	clientOptions := options.Client().ApplyURI(connectUri)
 

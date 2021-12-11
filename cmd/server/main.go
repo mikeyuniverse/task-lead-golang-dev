@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"grpc-practice/internal/server/config"
 	"grpc-practice/internal/server/repo"
 	"grpc-practice/internal/server/repo/mongo"
@@ -10,6 +11,10 @@ import (
 )
 
 func main() {
+	err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	config, err := config.Read()
 	if err != nil {
@@ -28,7 +33,8 @@ func main() {
 
 	services := services.New(repo)
 
-	srv, err := server.New(config.Server, services)
+	ctx := context.Background()
+	srv, err := server.New(&ctx, config.Server, services)
 	if err != nil {
 		log.Fatal(err)
 	}
