@@ -12,38 +12,43 @@ type MongoConfig struct {
 	CollectionName string
 }
 
-func NewMongoConfig() (*MongoConfig, error) {
+func NewMongoConfig() (MongoConfig, error) {
 	var mongo MongoConfig
 	err := envconfig.Process("MONGO", &mongo)
 	if err != nil {
-		return nil, err
+		return MongoConfig{}, err
 	}
-	return &mongo, nil
+	return mongo, nil
 }
 
 type GRPC struct {
 	Port string
 }
 
-func NewGRPCConfig() (*GRPC, error) {
+func NewGRPCConfig() (GRPC, error) {
 	var grpc GRPC
 	err := envconfig.Process("grpc", &grpc)
 	if err != nil {
-		return nil, err
+		return GRPC{}, err
 	}
-	return &grpc, nil
+	return grpc, nil
 }
 
 type Config struct {
-	DB     *MongoConfig
-	Server *GRPC
+	DB     MongoConfig
+	Server GRPC
+}
+
+func Load() error {
+	err := godotenv.Load(".env")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func Read() (*Config, error) {
-	err := godotenv.Load(".env")
-	if err != nil {
-		return nil, err
-	}
+
 	mongo, err := NewMongoConfig()
 	if err != nil {
 		return nil, err
