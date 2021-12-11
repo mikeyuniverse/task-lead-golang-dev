@@ -31,7 +31,7 @@ func (s *Server) Fetch(url string) error {
 	return err
 }
 
-func (s *Server) List(pagg *transport.Pagging, sort *transport.Sorting) ([]string, error) {
+func (s *Server) List(pagg *transport.Pagging, sort *transport.Sorting) ([][]string, error) {
 	req := transport.ListRequest{
 		Start:   pagg.Start,
 		Limit:   pagg.Limit,
@@ -57,17 +57,18 @@ func (s *Server) List(pagg *transport.Pagging, sort *transport.Sorting) ([]strin
 
 	items, err := s.grpcClient.List(context.TODO(), &req)
 	if err != nil {
-		return []string{}, err
+		return [][]string{}, err
 	}
 
 	data := itemsFormating(items)
 	return data, err
 }
 
-func itemsFormating(items *transport.ListResponse) []string {
+func itemsFormating(items *transport.ListResponse) [][]string {
 	itemList := items.Item
+	result := make([][]string, len(itemList))
 	for _, item := range itemList {
-		fmt.Println(item)
+		result = append(result, []string{item.Name, string(item.Price)})
 	}
-	return []string{}
+	return result
 }
