@@ -13,6 +13,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+//go:generate mockgen -source=server.go -destination=mocks/mock.go
+
 type servicer interface {
 	Fetch(url string) error
 	List(context context.Context, params repo.ListParams) ([]*transport.Item, error)
