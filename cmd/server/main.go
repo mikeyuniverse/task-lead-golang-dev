@@ -7,6 +7,7 @@ import (
 	"grpc-practice/internal/server/repo/mongo"
 	server "grpc-practice/internal/server/server"
 	"grpc-practice/internal/server/services"
+	getter "grpc-practice/pkg/proto/getterURL"
 	"log"
 )
 
@@ -31,7 +32,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	services := services.New(repo)
+	getter := getter.New()
+
+	services := services.New(repo, getter)
 
 	ctx := context.Background()
 	srv, err := server.New(&ctx, config.Server, services)
