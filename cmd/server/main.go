@@ -7,7 +7,7 @@ import (
 	"grpc-practice/internal/server/repo/mongo"
 	server "grpc-practice/internal/server/server"
 	"grpc-practice/internal/server/services"
-	getter "grpc-practice/pkg/proto/getterURL"
+	getter "grpc-practice/pkg/getter"
 	"log"
 )
 
