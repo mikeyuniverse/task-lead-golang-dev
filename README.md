@@ -10,10 +10,10 @@
 
 | Package | Coverage |
 |---|---|
-| All | 25,0% |
+| Total | 65,0% |
 | Config | 61,9% |
 | Server | 47,1% |
-| Services | 0,0% |
+| Services | 81,8% |
 
 ## Генерация grpc
 
