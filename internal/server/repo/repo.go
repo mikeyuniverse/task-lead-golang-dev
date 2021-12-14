@@ -6,6 +6,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+//go:generate mockgen -source=repo.go -destination=mocks/mock.go
+
 var collectionProducts = "products"
 
 type Producter interface {
