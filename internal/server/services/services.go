@@ -31,8 +31,7 @@ func (s *Services) Fetch(url string) error {
 	if err != nil {
 		return err
 	}
-	err = s.repo.Products.UpdateItems(items)
-	return err
+	return s.repo.Products.UpdateItems(items)
 }
 
 func (s *Services) List(context context.Context, params repo.ListParams) ([]*transport.Item, error) {
