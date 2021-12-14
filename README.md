@@ -15,6 +15,20 @@
 | Server | 47,1% |
 | Services | 81,8% |
 
+### **Команды тестирования**
+
+Сделать тесты и записать результаты в cover.out
+
+```go
+go test -coverprofile=cover.out -v ./...
+```
+
+Проверить покрытие тестами
+
+```go
+go tool cover -func=cover.out
+```
+
 ## Генерация grpc
 
 ```bash
