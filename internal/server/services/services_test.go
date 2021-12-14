@@ -8,7 +8,7 @@ import (
 	repo "grpc-practice/internal/server/repo"
 	mock_repo "grpc-practice/internal/server/repo/mocks"
 	mock_services "grpc-practice/internal/server/services/mocks"
-	getter "grpc-practice/pkg/proto/getterURL"
+	getter "grpc-practice/pkg/getter"
 	"grpc-practice/pkg/proto/transport"
 	"testing"
 
@@ -18,13 +18,15 @@ import (
 type testTableFetch struct {
 	name string
 	In   struct {
-		URL       string
-		Items     []models.Item
-		getterErr error
+		URL         string
+		getterItems []models.Item
+		getterErr   error
+		repoItems   []models.Item
 	}
 	Out struct {
-		wantErr bool
-		repoErr error
+		wantErr   bool
+		repoErr   error
+		getterErr error
 	}
 	WantGetterErr bool
 }
@@ -34,23 +36,27 @@ func Test_Fetch(t *testing.T) {
 		{
 			name: "OK",
 			In: struct {
-				URL       string
-				Items     []models.Item
-				getterErr error
+				URL         string
+				getterItems []models.Item
+				getterErr   error
+				repoItems   []models.Item
 			}{
 				URL: "https://example.url",
-				Items: []models.Item{
+				getterItems: []models.Item{
 					{Name: "Item 1", Price: 1},
 					{Name: "Item 2", Price: 2},
 				},
 				getterErr: nil,
+				repoItems: []models.Item{},
 			},
 			Out: struct {
-				wantErr bool
-				repoErr error
+				wantErr   bool
+				repoErr   error
+				getterErr error
 			}{
-				wantErr: false,
-				repoErr: nil,
+				wantErr:   false,
+				repoErr:   nil,
+				getterErr: nil,
 			},
 			WantGetterErr: false,
 		},
@@ -58,27 +64,23 @@ func Test_Fetch(t *testing.T) {
 
 	for _, test := range testTable {
 		t.Run(test.name, func(t *testing.T) {
-			// Init dependencies
 			controller := gomock.NewController(t)
 			repoProducts := mock_repo.NewMockProducter(controller)
 			getter := mock_services.NewMockGetter(controller)
 
-			// if !test.WantGetterErr {
-			// repoProducts.EXPECT().UpdateItems(test.In.Items).Return(test.Out.repoErr)
-			// }
+			getter.EXPECT().GetItemsByURL(test.In.URL).Return(test.In.repoItems, test.Out.getterErr)
+
+			// If an error is not expected with the GetItemsByURL method, then a call waiting is added
+			if !test.WantGetterErr {
+				repoProducts.EXPECT().UpdateItems(test.In.repoItems).Return(test.Out.repoErr)
+			}
 
 			repository := repo.Repo{Products: repoProducts}
 			services := New(&repository, getter)
 
-			getter.EXPECT().GetItemsByURL(test.In.URL).Return(test.In.Items, test.In.getterErr)
-			repoProducts.EXPECT().UpdateItems(test.In.Items).Return(test.Out.repoErr)
-
-			// Act
 			err := services.Fetch(test.In.URL)
-
-			// Assert
 			if err != nil && !test.Out.wantErr {
-				t.Fatalf("fetch error - %s\n", err.Error())
+				t.Errorf("fetch error - %s\n", err.Error())
 			}
 
 		})
@@ -203,5 +205,3 @@ func Test_List(t *testing.T) {
 
 	}
 }
-
-func Test_getItemsByURL(t *testing.T) {}
