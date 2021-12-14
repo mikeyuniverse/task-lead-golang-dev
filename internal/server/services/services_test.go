@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"grpc-practice/internal/server/models"
 	repo "grpc-practice/internal/server/repo"
@@ -36,13 +37,13 @@ func Test_Fetch(t *testing.T) {
 type testTableList struct {
 	name string
 	In   repo.ListParams
-	URL  string
 	Out  struct {
-		wantErr       bool
-		errorObject   error
-		itemCount     int
-		itemsFromRepo []models.Item
-		itemsResult   []*transport.Item
+		wantErr              bool
+		wantErrBeforeDBQuery bool
+		errorObject          error
+		itemCount            int
+		itemsFromRepo        []models.Item
+		itemsResult          []*transport.Item
 	}
 }
 
@@ -56,17 +57,18 @@ func Test_List(t *testing.T) {
 				SortType:  "NAME",
 				OrderType: "DESC",
 			},
-			URL: "http://localhost/items",
 			Out: struct {
-				wantErr       bool
-				errorObject   error
-				itemCount     int
-				itemsFromRepo []models.Item
-				itemsResult   []*transport.Item
+				wantErr              bool
+				wantErrBeforeDBQuery bool
+				errorObject          error
+				itemCount            int
+				itemsFromRepo        []models.Item
+				itemsResult          []*transport.Item
 			}{
-				wantErr:     false,
-				errorObject: nil,
-				itemCount:   14,
+				wantErr:              false,
+				wantErrBeforeDBQuery: false,
+				errorObject:          nil,
+				itemCount:            14,
 				itemsFromRepo: []models.Item{
 					{Name: "Item 1", Price: 100},
 					{Name: "Item 2", Price: 200},
@@ -87,6 +89,30 @@ func Test_List(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Error in sort type",
+			In: repo.ListParams{
+				Start:     0,
+				Limit:     5,
+				SortType:  "PRAME",
+				OrderType: "DESC",
+			},
+			Out: struct {
+				wantErr              bool
+				wantErrBeforeDBQuery bool
+				errorObject          error
+				itemCount            int
+				itemsFromRepo        []models.Item
+				itemsResult          []*transport.Item
+			}{
+				wantErr:              true,
+				wantErrBeforeDBQuery: true,
+				errorObject:          errors.New("unknown sorting column name"),
+				itemCount:            0,
+				itemsFromRepo:        []models.Item{},
+				itemsResult:          []*transport.Item{},
+			},
+		},
 	}
 
 	for _, test := range testTable {
@@ -95,21 +121,27 @@ func Test_List(t *testing.T) {
 			controller := gomock.NewController(t)
 			repoProducts := mock_repo.NewMockProducter(controller)
 
-			repoProducts.EXPECT().GetItemsWithSort(test.In).Return(test.Out.itemsFromRepo, test.Out.errorObject)
-
 			getter := getter.New()
 			repository := repo.Repo{Products: repoProducts}
 			services := New(&repository, getter)
-			// services.EXPECT().getItemsByURL()
 
+			if !test.Out.wantErrBeforeDBQuery {
+				repoProducts.EXPECT().GetItemsWithSort(test.In).Return(test.Out.itemsFromRepo, test.Out.errorObject)
+			}
 			// Action
 			ctx := context.Background()
 			items, err := services.List(ctx, test.In)
-			if err != nil {
+
+			// Assert
+			if err != nil && !test.Out.wantErr {
 				t.Fatalf("list error.\nerror - %s\n", err.Error())
 			}
 
-			// Assert
+			if err != nil && test.Out.wantErr {
+				if err.Error() != test.Out.errorObject.Error() {
+					t.Fatalf("The expected error does not match the one received.\nExpected: %s\n", err.Error())
+				}
+			}
 
 			if len(items) != test.Out.itemCount {
 				fmt.Println(items)
