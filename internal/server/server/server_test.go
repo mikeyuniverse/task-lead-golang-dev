@@ -63,6 +63,7 @@ func TestServer_Fetch(t *testing.T) {
 }
 
 func TestServer_List(t *testing.T) {
+	// TODO How do I test pagination and sorting?
 	testTable := []struct {
 		name    string
 		data_in struct {
