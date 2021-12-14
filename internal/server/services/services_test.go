@@ -7,6 +7,7 @@ import (
 	"grpc-practice/internal/server/models"
 	repo "grpc-practice/internal/server/repo"
 	mock_repo "grpc-practice/internal/server/repo/mocks"
+	mock_services "grpc-practice/internal/server/services/mocks"
 	getter "grpc-practice/pkg/proto/getterURL"
 	"grpc-practice/pkg/proto/transport"
 	"testing"
@@ -15,22 +16,73 @@ import (
 )
 
 type testTableFetch struct {
-	name   string
-	dataIn struct {
-		url string
+	name string
+	In   struct {
+		URL       string
+		Items     []models.Item
+		getterErr error
 	}
-	dataOut struct {
-		getItemsByUrl struct {
-			items    []models.Item
-			errorObj error
-		}
-		updateItems struct {
-			errorObj error
-		}
+	Out struct {
+		wantErr bool
+		repoErr error
 	}
+	WantGetterErr bool
 }
 
 func Test_Fetch(t *testing.T) {
+	testTable := []testTableFetch{
+		{
+			name: "OK",
+			In: struct {
+				URL       string
+				Items     []models.Item
+				getterErr error
+			}{
+				URL: "https://example.url",
+				Items: []models.Item{
+					{Name: "Item 1", Price: 1},
+					{Name: "Item 2", Price: 2},
+				},
+				getterErr: nil,
+			},
+			Out: struct {
+				wantErr bool
+				repoErr error
+			}{
+				wantErr: false,
+				repoErr: nil,
+			},
+			WantGetterErr: false,
+		},
+	}
+
+	for _, test := range testTable {
+		t.Run(test.name, func(t *testing.T) {
+			// Init dependencies
+			controller := gomock.NewController(t)
+			repoProducts := mock_repo.NewMockProducter(controller)
+			getter := mock_services.NewMockGetter(controller)
+
+			// if !test.WantGetterErr {
+			// repoProducts.EXPECT().UpdateItems(test.In.Items).Return(test.Out.repoErr)
+			// }
+
+			repository := repo.Repo{Products: repoProducts}
+			services := New(&repository, getter)
+
+			getter.EXPECT().GetItemsByURL(test.In.URL).Return(test.In.Items, test.In.getterErr)
+			repoProducts.EXPECT().UpdateItems(test.In.Items).Return(test.Out.repoErr)
+
+			// Act
+			err := services.Fetch(test.In.URL)
+
+			// Assert
+			if err != nil && !test.Out.wantErr {
+				t.Fatalf("fetch error - %s\n", err.Error())
+			}
+
+		})
+	}
 
 }
 
