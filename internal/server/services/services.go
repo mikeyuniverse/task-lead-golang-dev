@@ -21,7 +21,8 @@ type Services struct {
 
 func New(repo *repo.Repo, getter Getter) *Services {
 	return &Services{
-		repo: repo,
+		repo:   repo,
+		getter: getter,
 	}
 }
 
